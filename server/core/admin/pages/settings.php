@@ -13,8 +13,9 @@ if (Rishe_Admin::is_post() && Rishe_Admin::action() === 'save_settings') {
 		'cert_signer_name'  => 120,
 		'cert_signer_title' => 120,
 		'zibal_merchant'    => 100,
-		'sms_api_key'       => 200,
-		'sms_template'      => 100,
+		'sms_username'      => 100,
+		'sms_password'      => 200,
+		'sms_body_id'       => 20,
 	];
 	foreach ($text as $key => $max) {
 		Rishe_Settings::set($key, rishe_str($_POST, $key, $max));
@@ -69,10 +70,13 @@ $upload_cap = ini_get('upload_max_filesize');
 		</section>
 
 		<section class="rishe-card rishe-form">
-			<h2 style="margin:0">پیامک (کاوه‌نگار)</h2>
+			<h2 style="margin:0">پیامک (ملی پیامک)</h2>
 			<label class="rishe-check"><input type="checkbox" name="sms_enabled" id="sms_enabled" value="1" <?php echo $s['sms_enabled'] === '1' ? 'checked' : ''; ?>>ورود با کد یک‌بارمصرف و تأیید شماره در عضویت</label>
-			<label class="rishe-field"><span>API Key</span><input class="rishe-input ltr" name="sms_api_key" id="sms_api_key" value="<?php echo rishe_e($s['sms_api_key']); ?>"></label>
-			<label class="rishe-field"><span>نام الگو (Template)</span><input class="rishe-input ltr" name="sms_template" id="sms_template" value="<?php echo rishe_e($s['sms_template']); ?>" placeholder="rishe-otp"><small>الگوی تأیید در کاوه‌نگار با متغیر <span class="ltr">%token</span>.</small></label>
+			<div class="rishe-grid is-2">
+				<label class="rishe-field"><span>نام کاربری</span><input class="rishe-input ltr" name="sms_username" id="sms_username" value="<?php echo rishe_e($s['sms_username']); ?>" autocomplete="off"></label>
+				<label class="rishe-field"><span>رمز / کلید API</span><input class="rishe-input ltr" type="password" name="sms_password" id="sms_password" value="<?php echo rishe_e($s['sms_password']); ?>" autocomplete="new-password"></label>
+			</div>
+			<label class="rishe-field"><span>کد الگو (bodyId)</span><input class="rishe-input ltr" name="sms_body_id" id="sms_body_id" inputmode="numeric" value="<?php echo rishe_e($s['sms_body_id']); ?>" placeholder="123456"><small>در پنل ملی پیامک، از بخش «وب‌سرویس خدماتی» یک الگو مثل «کد ورود شما به ریشه: {0}» بسازید و بعد از تأیید، کد آن را اینجا وارد کنید. کد پیامک جای <span class="ltr">{0}</span> قرار می‌گیرد.</small></label>
 		</section>
 
 		<section class="rishe-card rishe-form">

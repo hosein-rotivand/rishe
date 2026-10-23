@@ -19,8 +19,9 @@ final class Rishe_Settings {
 		'cert_signer_name'  => '',
 		'cert_signer_title' => 'مدیر آموزش',
 		'sms_enabled'       => '0',
-		'sms_api_key'       => '',
-		'sms_template'      => '',
+		'sms_username'      => '',
+		'sms_password'      => '',
+		'sms_body_id'       => '',
 		'upload_max_mb'     => '10',
 	];
 
