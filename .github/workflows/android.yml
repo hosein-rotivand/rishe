@@ -45,7 +45,7 @@ jobs:
           if [ -n "$RISHE_API_URL" ]; then
             sed -i "s#apiBase: '.*'#apiBase: '${RISHE_API_URL}'#" www/js/config.js
           else
-            echo "::warning::Repository variable RISHE_API_URL is not set; the APK points to example.com"
+            echo "RISHE_API_URL is not set; using the address in www/js/config.js"
           fi
           grep apiBase www/js/config.js
 

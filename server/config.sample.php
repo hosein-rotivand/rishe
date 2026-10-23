@@ -12,7 +12,7 @@ return [
 		'pass' => 'change-me',
 	],
 	// Public URL of this folder, without trailing slash
-	'base_url' => 'https://example.com/rishe',
+	'base_url' => 'http://app.kasbomal.ir/rishe',
 	// Random secret, used for hashing OTP codes
 	'app_key'  => 'change-me-to-a-long-random-string',
 	'debug'    => false,

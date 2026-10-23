@@ -3,10 +3,10 @@
   "appName": "ریشه",
   "webDir": "www",
   "server": {
-    "androidScheme": "https"
+    "androidScheme": "http",
+    "cleartext": true
   },
   "android": {
-    "allowMixedContent": false,
     "backgroundColor": "#F6F9F7"
   }
 }
