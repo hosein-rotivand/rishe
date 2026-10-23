@@ -11,6 +11,7 @@ final class Rishe_Admin {
 	public const PAGES = [
 		'dashboard'    => ['داشبورد', 'home', true],
 		'courses'      => ['دوره‌ها', 'book', true],
+		'content'      => ['دوره‌های آماده', 'library', true],
 		'course'       => ['ویرایش دوره', 'book', false],
 		'chapter'      => ['فصل', 'book', false],
 		'lesson'       => ['مرحله', 'book', false],
@@ -37,6 +38,7 @@ final class Rishe_Admin {
 		'logout'  => '<path d="M15 4h4v16h-4M10 8l-4 4 4 4M6 12h10"/>',
 		'plus'    => '<path d="M12 5v14M5 12h14"/>',
 		'root'    => '<path d="M12 3v8M12 11c0 4-4 4-4 8M12 11c0 4 4 4 4 8M12 11v10"/>',
+		'library' => '<path d="M4 4h4v16H4zM10 4h4v16h-4z"/><path d="m16 5 3.8-1 3 15.5-3.8 1z"/>',
 		'audio'   => '<path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path d="M15.5 9a4 4 0 0 1 0 6"/>',
 	];
 
@@ -133,6 +135,22 @@ final class Rishe_Admin {
 		Rishe_DB::delete('rishe_questions', ['owner_type' => 'lesson', 'owner_id' => $lesson_id]);
 		Rishe_DB::delete('rishe_progress', ['lesson_id' => $lesson_id]);
 		Rishe_DB::delete('rishe_lessons', ['id' => $lesson_id]);
+	}
+
+	/**
+	 * Delete a course with all its chapters, lessons, exam questions and audio files.
+	 */
+	public static function delete_course(int $course_id): void {
+		foreach (Rishe_DB::rows('SELECT l.id FROM rishe_lessons l INNER JOIN rishe_chapters c ON c.id = l.chapter_id WHERE c.course_id = ?', [$course_id]) as $l) {
+			self::delete_lesson((int) $l['id']);
+		}
+		foreach (Rishe_DB::rows("SELECT audio_path FROM rishe_questions WHERE owner_type = 'exam' AND owner_id = ?", [$course_id]) as $q) {
+			Rishe_Upload::remove($q['audio_path']);
+		}
+		Rishe_DB::delete('rishe_questions', ['owner_type' => 'exam', 'owner_id' => $course_id]);
+		Rishe_DB::delete('rishe_exam_results', ['course_id' => $course_id]);
+		Rishe_DB::delete('rishe_chapters', ['course_id' => $course_id]);
+		Rishe_DB::delete('rishe_courses', ['id' => $course_id]);
 	}
 
 	public static function layout(string $page, string $title, string $content, array $admin, array $crumbs = []): void {

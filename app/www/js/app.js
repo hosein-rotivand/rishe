@@ -130,8 +130,13 @@
 		auth: { mode: 'login', step: 1, error: '', mobile: '', pending: null },
 		lesson: null,
 		exam: null,
-		openChapter: null
+		openChapter: null,
+		autoTimer: null
 	};
+
+	function clearAuto() {
+		if (state.autoTimer) { clearTimeout(state.autoTimer); clearInterval(state.autoTimer); state.autoTimer = null; }
+	}
 
 	var depth = 0;
 
@@ -144,6 +149,7 @@
 	}
 
 	function show(entry) {
+		clearAuto();
 		player.stop();
 		state.view = entry.view;
 		state.params = entry.params || {};
@@ -200,6 +206,7 @@
 		var top = risheView.firstElementChild ? risheView.firstElementChild.scrollTop : 0;
 		risheView.innerHTML = view.html(state.data, state.params);
 		if (view.keepScroll && risheView.firstElementChild) { risheView.firstElementChild.scrollTop = top; }
+		if (view.after) { view.after(state.data, state.params); }
 	}
 
 	function paintTabs(active) {
@@ -474,15 +481,35 @@
 					questionBody(q, L.picked, L.checked);
 				if (L.checked) {
 					var ok = L.picked === q.answer;
-					foot = '<div class="rishe-foot ' + (ok ? 'is-ok' : 'is-bad') + '"><div class="rishe-feedback">' + ic(ok ? 'check' : 'close') + '<span>' + (ok ? 'آفرین، درست بود!' : 'نه کاملاً') + (ok ? '' : '<small>پاسخ درست: ' + esc(q.options[q.answer]) + '</small>') + '</span></div><button class="rishe-btn rishe-btn-primary' + (L.saving ? ' is-busy' : '') + '" data-act="lesson-next">' + (s === total - 1 ? 'پایان مرحله' : 'ادامه') + '</button></div>';
+					foot = '<div class="rishe-foot ' + (ok ? 'is-ok' : 'is-bad') + '"><div class="rishe-feedback" style="margin:0">' + ic(ok ? 'check' : 'close') + '<span>' + (ok ? 'آفرین، درست بود!' : 'نه کاملاً') + (ok ? '' : '<small>پاسخ درست: ' + esc(q.options[q.answer]) + '</small>') + '</span>' + (L.saving ? '<span class="rishe-spinner" style="width:22px;height:22px;margin-inline-start:auto"></span>' : '') + '</div></div>';
 				} else {
-					foot = '<div class="rishe-foot"><button class="rishe-btn rishe-btn-primary" data-act="check"' + (L.picked === null ? ' disabled' : '') + '>بررسی پاسخ</button></div>';
+					foot = '<div class="rishe-foot"><p class="rishe-label" style="margin:0;text-align:center">گزینه‌ی درست را انتخاب کن</p></div>';
 				}
 			}
 			return screen('<div class="rishe-lesson-top"><button class="rishe-icon-btn" data-act="back" aria-label="خروج از مرحله">' + ic('close') + '</button><div class="rishe-bar"><span style="width:' + pct + '%"></span></div><span class="rishe-cnt rishe-num">' + fa(s) + '/' + fa(total) + '</span></div>' +
 				'<div class="rishe-lesson-body">' + body + '</div>' + foot);
+		},
+		// Play each phrase (and each listening question) once when it appears
+		after: function () {
+			var L = state.lesson;
+			if (!L || L.autoplayed === L.step || L.checked) { return; }
+			L.autoplayed = L.step;
+			var d = L.data;
+			if (L.step < d.phrases.length) {
+				var ph = d.phrases[L.step];
+				if (ph.audio_url) { playPhrase(ph, 1); }
+			} else {
+				var q = d.questions[L.step - d.phrases.length];
+				if (q && q.type === 'listen' && q.audio_url) { player.play(q.audio_url, {}); }
+			}
 		}
 	};
+
+	function playPhrase(ph, rate) {
+		var wave = document.getElementById('rishe-wave');
+		if (wave) { wave.classList.add('is-playing'); }
+		player.play(ph.audio_url, { text: ph.en, rate: rate, onStop: function () { var w = document.getElementById('rishe-wave'); if (w) { w.classList.remove('is-playing'); } } });
+	}
 
 	function questionBody(q, picked, checked) {
 		var keys = ['A', 'B', 'C', 'D'];
@@ -534,9 +561,24 @@
 				'<h2 class="rishe-h1">مرحله‌ی «' + esc(p.title) + '» تمام شد</h2>' +
 				'<p class="rishe-muted">' + (r.next ? 'مرحله‌ی بعد، «' + esc(r.next.title) + '»، باز شد.' : (r.course_completed ? 'همه‌ی مراحل این دوره را تمام کردی!' : '')) + '</p>' +
 				'<div class="rishe-stats" style="width:100%"><div class="rishe-card rishe-stat"><b class="rishe-num" style="color:var(--rishe-brand)">+' + fa(r.xp_gained || 0) + '</b><span>امتیاز</span></div><div class="rishe-card rishe-stat"><b class="rishe-num rishe-flame">' + fa(r.stats.streak || 0) + ' روز</b><span>زنجیره</span></div><div class="rishe-card rishe-stat"><b class="rishe-num">' + fa(r.correct || 0) + '/' + fa(r.total || 0) + '</b><span>پاسخ درست</span></div></div>' +
-				(r.next ? '<button class="rishe-btn rishe-btn-primary" data-go="lesson" data-id="' + r.next.id + '" data-replace="1">ادامه به مرحله‌ی بعد</button>' : '<button class="rishe-btn rishe-btn-primary" data-go="course" data-id="' + p.course + '" data-replace="1">' + (r.course_completed ? 'آزمون پایانی و مدرک' : 'بازگشت به دوره') + '</button>') +
+				(r.next ? '<p class="rishe-label" id="rishe-auto" style="margin:0">رفتن خودکار به مرحله‌ی بعد تا <b class="rishe-num" id="rishe-auto-n">۳</b> ثانیه… <button class="rishe-link" data-act="auto-cancel">ماندن</button></p><button class="rishe-btn rishe-btn-primary" data-go="lesson" data-id="' + r.next.id + '" data-replace="1">ادامه به مرحله‌ی بعد</button>' : '<button class="rishe-btn rishe-btn-primary" data-go="course" data-id="' + p.course + '" data-replace="1">' + (r.course_completed ? 'آزمون پایانی و مدرک' : 'بازگشت به دوره') + '</button>') +
 				'<button class="rishe-btn rishe-btn-ghost" data-tab="home">خانه</button>' +
 			'</div>');
+		},
+		after: function (_, p) {
+			var r = p.result || {};
+			if (!r.next) { return; }
+			var left = 3;
+			clearAuto();
+			state.autoTimer = setInterval(function () {
+				left--;
+				var n = document.getElementById('rishe-auto-n');
+				if (n) { n.textContent = fa(left); }
+				if (left <= 0) {
+					clearAuto();
+					go('lesson', { id: r.next.id }, { replace: true });
+				}
+			}, 1000);
 		}
 	};
 
@@ -558,9 +600,33 @@
 			var last = E.step === qs.length - 1;
 			return screen('<div class="rishe-lesson-top"><button class="rishe-icon-btn" data-act="back" aria-label="خروج از آزمون">' + ic('close') + '</button><div class="rishe-bar"><span style="width:' + Math.round((E.step / qs.length) * 100) + '%"></span></div><span class="rishe-cnt rishe-num">' + fa(E.step + 1) + '/' + fa(qs.length) + '</span></div>' +
 				'<div class="rishe-lesson-body"><div class="rishe-step-kind"><span class="rishe-pill rishe-pill-amber">' + ic('star') + ' آزمون پایانی · ' + esc(E.data.course.title) + '</span></div>' + questionBody(q, picked, false) + '</div>' +
-				'<div class="rishe-foot"><button class="rishe-btn rishe-btn-primary' + (E.saving ? ' is-busy' : '') + '" data-act="exam-next"' + (picked === null ? ' disabled' : '') + '>' + (last ? 'پایان و ثبت آزمون' : 'سؤال بعدی') + '</button></div>');
+				'<div class="rishe-foot"><p class="rishe-label" style="margin:0;text-align:center">' + (E.saving ? 'در حال ثبت آزمون…' : (last ? 'با انتخاب گزینه، آزمون ثبت می‌شود' : 'با انتخاب گزینه، سؤال بعدی می‌آید')) + '</p></div>');
+		},
+		after: function () {
+			var E = state.exam;
+			if (!E || E.autoplayed === E.step) { return; }
+			E.autoplayed = E.step;
+			var q = E.data.questions[E.step];
+			if (q.type === 'listen' && q.audio_url) { player.play(q.audio_url, {}); }
 		}
 	};
+
+	function examNext() {
+		var E = state.exam;
+		E.locked = false;
+		if (E.step < E.data.questions.length - 1) {
+			E.step++;
+			player.stop();
+			paint();
+			return;
+		}
+		if (E.saving) { return; }
+		E.saving = true;
+		paint();
+		risheApi.post('courses/' + E.data.course.id + '/exam', { answers: E.answers }).then(function (res) {
+			go('examResult', { result: res, course: E.data.course.id }, { replace: true });
+		}, function (err) { E.saving = false; paint(); toast(err.message); });
+	}
 
 	VIEWS.examResult = {
 		guest: false,
@@ -795,13 +861,12 @@
 			case 'word':
 				L.wordSel = L.wordSel === el.dataset.word ? null : el.dataset.word;
 				paint();
-				if (L.wordSel && 'speechSynthesis' in window) { player.play(null, { text: L.wordSel, rate: 0.9 }); }
+				if (L.wordSel && 'speechSynthesis' in window && window.SpeechSynthesisUtterance) {
+					try { window.speechSynthesis.cancel(); var wu = new SpeechSynthesisUtterance(L.wordSel); wu.lang = 'en-US'; window.speechSynthesis.speak(wu); } catch (e2) { /* no TTS on this device */ }
+				}
 				break;
 			case 'play':
-				var ph = L.data.phrases[L.step];
-				var wave = document.getElementById('rishe-wave');
-				if (wave) { wave.classList.add('is-playing'); }
-				player.play(ph.audio_url, { text: ph.en, rate: Number(el.dataset.rate), onStop: function () { var w = document.getElementById('rishe-wave'); if (w) { w.classList.remove('is-playing'); } } });
+				playPhrase(L.data.phrases[L.step], Number(el.dataset.rate));
 				break;
 			case 'teacher':
 				var tp = L.data.phrases[L.step];
@@ -819,32 +884,34 @@
 				player.play(q.audio_url, { text: q.say_text, rate: 1 });
 				break;
 			case 'pick':
+				// Answering moves on by itself: no confirm button
 				if (state.view === 'exam') {
-					var eq = state.exam.data.questions[state.exam.step];
-					state.exam.answers[eq.id] = Number(el.dataset.index);
+					var E = state.exam;
+					if (E.locked || E.saving) { break; }
+					E.locked = true;
+					E.answers[E.data.questions[E.step].id] = Number(el.dataset.index);
+					paint();
+					clearAuto();
+					state.autoTimer = setTimeout(examNext, 350);
 				} else {
+					if (L.checked) { break; }
+					var cq = L.data.questions[L.step - L.data.phrases.length];
 					L.picked = Number(el.dataset.index);
+					L.checked = true;
+					var right = L.picked === cq.answer;
+					if (right) { L.correct++; }
+					paint();
+					clearAuto();
+					state.autoTimer = setTimeout(lessonNext, right ? 1100 : 2400);
 				}
-				paint();
 				break;
-			case 'check':
-				var cq = L.data.questions[L.step - L.data.phrases.length];
-				L.checked = true;
-				if (L.picked === cq.answer) { L.correct++; }
-				paint();
+			case 'auto-cancel':
+				clearAuto();
+				var autoBox = document.getElementById('rishe-auto');
+				if (autoBox) { autoBox.hidden = true; }
 				break;
 			case 'lesson-next':
 				lessonNext();
-				break;
-			case 'exam-next':
-				var E = state.exam;
-				if (E.step < E.data.questions.length - 1) { E.step++; player.stop(); paint(); break; }
-				if (E.saving) { break; }
-				E.saving = true;
-				paint();
-				risheApi.post('courses/' + E.data.course.id + '/exam', { answers: E.answers }).then(function (res) {
-					go('examResult', { result: res, course: E.data.course.id }, { replace: true });
-				}, function (err) { E.saving = false; paint(); toast(err.message); });
 				break;
 			case 'cert-request':
 				busy(el, true);

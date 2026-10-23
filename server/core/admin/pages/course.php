@@ -65,13 +65,12 @@ if (Rishe_Admin::is_post()) {
 	}
 
 	if ($course && $action === 'delete_course') {
-		if (Rishe_DB::value('SELECT COUNT(*) FROM rishe_chapters WHERE course_id = ?', [$id])) {
-			Rishe_Admin::flash('اول فصل‌های این دوره را حذف کنید.', 'bad');
+		if (Rishe_DB::value('SELECT COUNT(*) FROM rishe_certificates WHERE course_id = ?', [$id])) {
+			Rishe_Admin::flash('برای این دوره مدرک ثبت شده است؛ به جای حذف، آن را پیش‌نویس کنید.', 'bad');
 			Rishe_Admin::redirect('course', ['id' => $id]);
 		}
-		Rishe_DB::delete('rishe_questions', ['owner_type' => 'exam', 'owner_id' => $id]);
-		Rishe_DB::delete('rishe_courses', ['id' => $id]);
-		Rishe_Admin::flash('دوره حذف شد.');
+		Rishe_Admin::delete_course($id);
+		Rishe_Admin::flash('دوره با همه‌ی محتوایش حذف شد.');
 		Rishe_Admin::redirect('courses');
 	}
 }
@@ -163,8 +162,8 @@ $crumbs = ['دوره‌ها' => Rishe_Admin::url('courses')];
 		</section>
 
 		<section class="rishe-card">
-			<div class="rishe-card-head"><h2>حذف دوره</h2><?php echo Rishe_Admin::delete_button('delete_course', [], 'حذف دوره', 'دوره حذف شود؟ این کار برگشت‌پذیر نیست.'); ?></div>
-			<p class="rishe-help">فقط دوره‌ی بدون فصل قابل حذف است.</p>
+			<div class="rishe-card-head"><h2>حذف دوره</h2><?php echo Rishe_Admin::delete_button('delete_course', [], 'حذف دوره', 'دوره با همه‌ی فصل‌ها، مرحله‌ها، فایل‌های صوتی و پیشرفت کاربران حذف شود؟ این کار برگشت‌پذیر نیست.'); ?></div>
+			<p class="rishe-help">همه‌ی فصل‌ها، مرحله‌ها و فایل‌های صوتی دوره هم حذف می‌شوند. دوره‌ای که مدرک صادرشده دارد حذف نمی‌شود.</p>
 		</section>
 	</div>
 	<?php endif; ?>

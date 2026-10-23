@@ -3,7 +3,7 @@ Options -Indexes
 <IfModule mod_rewrite.c>
 	RewriteEngine On
 	# Never serve internal folders or the config file
-	RewriteRule ^(core|database)(/|$) - [F,L]
+	RewriteRule ^(core|database|content)(/|$) - [F,L]
 	RewriteRule ^config(\.sample)?\.php$ - [F,L]
 </IfModule>
 

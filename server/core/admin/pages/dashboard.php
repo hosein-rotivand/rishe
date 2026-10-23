@@ -21,7 +21,7 @@ $recent_certs = Rishe_DB::rows(
 $recent_users = Rishe_DB::rows('SELECT * FROM rishe_users ORDER BY id DESC LIMIT 6');
 ?>
 <?php if ($courses_count === 0) : ?>
-	<div class="rishe-note">هنوز دوره‌ی منتشرشده‌ای ندارید. از بخش <a href="<?php echo rishe_e(Rishe_Admin::url('course')); ?>">ساخت دوره</a> شروع کنید: دوره ← فصل ← مرحله ← عبارت‌ها و سؤال‌ها.</div>
+	<div class="rishe-note">هنوز دوره‌ی منتشرشده‌ای ندارید. از بخش <a href="<?php echo rishe_e(Rishe_Admin::url('content')); ?>">دوره‌های آماده</a> با یک کلیک ۴ دوره از صفر تا حرفه‌ای (با صدا) اضافه کنید، یا <a href="<?php echo rishe_e(Rishe_Admin::url('course')); ?>">دوره‌ی خودتان را بسازید</a>.</div>
 <?php endif; ?>
 <?php if (Rishe_Settings::enabled('payments_enabled') && Rishe_Settings::get('zibal_merchant') === '') : ?>
 	<div class="rishe-note">پرداخت روشن است اما کلید مرچنت زیبال وارد نشده؛ تا وارد نشود همه‌ی محتوا رایگان می‌ماند. <a href="<?php echo rishe_e(Rishe_Admin::url('settings')); ?>">تنظیمات</a></div>
