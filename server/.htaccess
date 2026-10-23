@@ -1,0 +1,12 @@
+Options -Indexes
+
+<IfModule mod_rewrite.c>
+	RewriteEngine On
+	# Never serve internal folders or the config file
+	RewriteRule ^(core|database)(/|$) - [F,L]
+	RewriteRule ^config(\.sample)?\.php$ - [F,L]
+</IfModule>
+
+<FilesMatch "^(config\.php|config\.sample\.php|.*\.sql|.*\.md)$">
+	Require all denied
+</FilesMatch>

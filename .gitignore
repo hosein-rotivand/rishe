@@ -1,0 +1,16 @@
+# Server secrets and user uploads
+server/config.php
+server/uploads/audio/*
+!server/uploads/audio/.gitkeep
+
+# App
+app/node_modules/
+dist/
+*.keystore
+*.jks
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

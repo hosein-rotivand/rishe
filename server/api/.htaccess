@@ -1,0 +1,8 @@
+<IfModule mod_rewrite.c>
+	RewriteEngine On
+	# Pass the Authorization header through to PHP (needed on many shared hosts)
+	RewriteCond %{HTTP:Authorization} .
+	RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+	RewriteCond %{REQUEST_FILENAME} !-f
+	RewriteRule ^ index.php [QSA,L]
+</IfModule>

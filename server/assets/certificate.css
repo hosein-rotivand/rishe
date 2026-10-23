@@ -1,0 +1,43 @@
+/* Rishe certificate (shared by the verify page; the app keeps a copy in app.css) */
+.rishe-cert-wrap { container-type: inline-size; width: 100%; }
+.rishe-cert {
+	position: relative; aspect-ratio: 1.414 / 1; width: 100%; max-width: 100%;
+	background: #FCFBF7; color: #1D2A24; border-radius: 6px; overflow: hidden;
+	box-shadow: 0 1px 2px rgba(0,0,0,.08), 0 10px 30px rgba(0,0,0,.12);
+	direction: rtl; font-family: "Vazirmatn", Tahoma, sans-serif;
+}
+.rishe-cert-frame { position: absolute; inset: 3cqw; border: 1px solid rgba(169,128,47,.55); border-radius: 2px; }
+.rishe-cert-frame::after { content: ""; position: absolute; inset: .8cqw; border: .3cqw solid rgba(169,128,47,.2); }
+.rishe-cert-dots {
+	position: absolute; inset: 0; opacity: .5;
+	background-image: radial-gradient(rgba(13,107,78,.10) 1px, transparent 1px); background-size: 2.4cqw 2.4cqw;
+	-webkit-mask-image: linear-gradient(to left, transparent 40%, #000); mask-image: linear-gradient(to left, transparent 40%, #000);
+}
+.rishe-cert-in { position: absolute; inset: 6.5cqw 7.5cqw 6cqw; display: flex; flex-direction: column; }
+.rishe-cert-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 2cqw; }
+.rishe-cert-brand { display: flex; align-items: center; gap: 1.8cqw; }
+.rishe-cert-mark { width: 7cqw; height: 7cqw; border-radius: 1.4cqw; background: #0D6B4E; color: #fff; display: grid; place-items: center; }
+.rishe-cert-mark svg { width: 4.4cqw; height: 4.4cqw; }
+.rishe-cert-brand b { font-size: 3cqw; font-weight: 800; display: block; color: #0D6B4E; }
+.rishe-cert-brand small { font-size: 1.7cqw; color: #5D6B64; }
+.rishe-cert-meta { font-size: 1.6cqw; color: #5D6B64; line-height: 1.9; text-align: left; }
+.rishe-cert-meta b { color: #1D2A24; direction: ltr; unicode-bidi: isolate; }
+.rishe-cert-title { margin-top: 4.4cqw; }
+.rishe-cert-en { font-family: Georgia, "Times New Roman", serif; font-size: 4.3cqw; letter-spacing: .06em; text-transform: uppercase; direction: ltr; text-align: right; }
+.rishe-cert-rule { height: .35cqw; width: 34cqw; margin-top: .8cqw; background: linear-gradient(to left, #A9802F, rgba(169,128,47,0)); }
+.rishe-cert-fa { font-size: 1.9cqw; color: #5D6B64; margin-top: 1cqw; }
+.rishe-cert-name { margin-top: 3cqw; display: flex; align-items: baseline; gap: 2.4cqw; flex-wrap: wrap; }
+.rishe-cert-name b { font-size: 5.6cqw; font-weight: 800; color: #A9802F; line-height: 1.3; }
+.rishe-cert-name span { font-family: Georgia, serif; font-style: italic; font-size: 2.4cqw; color: #5D6B64; direction: ltr; unicode-bidi: isolate; }
+.rishe-cert-text { font-size: 1.95cqw; line-height: 2; margin-top: 1.4cqw; max-width: 66cqw; color: #2F3C36; }
+.rishe-cert-text strong { color: #1D2A24; }
+.rishe-cert-bottom { margin-top: auto; display: flex; justify-content: space-between; align-items: flex-end; gap: 2cqw; }
+.rishe-cert-sign { display: flex; align-items: flex-end; gap: 2.4cqw; }
+.rishe-cert-seal { width: 11cqw; height: 11cqw; font-family: Arial, sans-serif; }
+.rishe-cert-sig { display: flex; flex-direction: column; align-items: center; gap: .4cqw; }
+.rishe-cert-line { width: 17cqw; border-top: 1px solid #B9B2A1; margin-bottom: .4cqw; }
+.rishe-cert-sig b { font-size: 1.7cqw; }
+.rishe-cert-sig small { font-size: 1.45cqw; color: #5D6B64; }
+.rishe-cert-verify { display: flex; flex-direction: column; align-items: flex-end; gap: .3cqw; }
+.rishe-cert-verify small { font-size: 1.4cqw; color: #5D6B64; }
+.rishe-cert-verify b { font-size: 1.5cqw; direction: ltr; unicode-bidi: isolate; font-family: Arial, sans-serif; font-weight: 600; }

@@ -1,0 +1,95 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'app/**'
+      - '.github/workflows/android.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app
+    env:
+      RISHE_VERSION_CODE: ${{ github.run_number }}
+      RISHE_VERSION_NAME: 1.0.${{ github.run_number }}
+      HAS_KEYSTORE: ${{ secrets.RISHE_KEYSTORE_BASE64 != '' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Set API address
+        env:
+          RISHE_API_URL: ${{ vars.RISHE_API_URL }}
+        run: |
+          if [ -n "$RISHE_API_URL" ]; then
+            sed -i "s#apiBase: '.*'#apiBase: '${RISHE_API_URL}'#" www/js/config.js
+          else
+            echo "::warning::Repository variable RISHE_API_URL is not set; the APK points to example.com"
+          fi
+          grep apiBase www/js/config.js
+
+      - name: Sync web files into the Android project
+        run: npx cap sync android
+
+      - name: Build debug APK
+        working-directory: app/android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon
+
+      - name: Build signed release APK
+        if: ${{ env.HAS_KEYSTORE == 'true' }}
+        working-directory: app/android
+        env:
+          RISHE_KEYSTORE_BASE64: ${{ secrets.RISHE_KEYSTORE_BASE64 }}
+          RISHE_KEYSTORE_PASSWORD: ${{ secrets.RISHE_KEYSTORE_PASSWORD }}
+          RISHE_KEY_ALIAS: ${{ secrets.RISHE_KEY_ALIAS }}
+          RISHE_KEY_PASSWORD: ${{ secrets.RISHE_KEY_PASSWORD }}
+        run: |
+          echo "$RISHE_KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/rishe.keystore"
+          RISHE_KEYSTORE_PATH="$RUNNER_TEMP/rishe.keystore" ./gradlew assembleRelease --no-daemon
+
+      - name: Collect APKs
+        run: |
+          mkdir -p ../dist
+          cp android/app/build/outputs/apk/debug/app-debug.apk ../dist/rishe-${RISHE_VERSION_NAME}-debug.apk
+          if [ -f android/app/build/outputs/apk/release/app-release.apk ]; then
+            cp android/app/build/outputs/apk/release/app-release.apk ../dist/rishe-${RISHE_VERSION_NAME}.apk
+          fi
+          ls -la ../dist
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: rishe-apk
+          path: dist/*.apk
+
+      - name: Publish to GitHub Releases
+        if: github.ref == 'refs/heads/main'
+        working-directory: .
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "v${RISHE_VERSION_NAME}" dist/*.apk \
+            --title "Rishe ${RISHE_VERSION_NAME}" \
+            --notes "Android build ${RISHE_VERSION_NAME} from ${GITHUB_SHA::7}. Install rishe-*-debug.apk for testing."

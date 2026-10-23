@@ -1,0 +1,12 @@
+{
+  "appId": "ir.kasbomal.rishe",
+  "appName": "ریشه",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  },
+  "android": {
+    "allowMixedContent": false,
+    "backgroundColor": "#F6F9F7"
+  }
+}

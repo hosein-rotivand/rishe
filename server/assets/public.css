@@ -1,0 +1,24 @@
+@font-face { font-family: "Vazirmatn"; src: url("fonts/Vazirmatn-Variable.woff2") format("woff2"); font-weight: 100 900; font-display: swap; }
+:root { --bg: #F6F9F7; --surface: #fff; --ink: #12201A; --ink-2: #56685F; --line: #DCE5E0; --brand: #0D6B4E; --ok: #1D8A55; --ok-soft: #DDF3E6; --bad: #C0443A; --bad-soft: #FBE3E0; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: "Vazirmatn", Tahoma, sans-serif; font-size: 15px; }
+.ltr { direction: ltr; unicode-bidi: isolate; }
+.rishe-public { max-width: 460px; margin: 0 auto; padding: 48px 16px; display: flex; flex-direction: column; gap: 16px; }
+.rishe-public-wide { max-width: 860px; }
+.rishe-public-card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 28px 24px; text-align: center; display: flex; flex-direction: column; gap: 12px; align-items: center; }
+.rishe-public-card h1 { margin: 0; font-size: 21px; }
+.rishe-public-card p { margin: 0; color: var(--ink-2); line-height: 1.9; }
+.rishe-public-badge { width: 64px; height: 64px; border-radius: 50%; display: grid; place-items: center; font-size: 28px; font-weight: 800; }
+.rishe-public-badge.is-ok { background: var(--ok-soft); color: var(--ok); }
+.rishe-public-badge.is-bad { background: var(--bad-soft); color: var(--bad); }
+.rishe-public-card dl { display: grid; grid-template-columns: auto 1fr; gap: 8px 16px; margin: 4px 0; width: 100%; text-align: right; }
+.rishe-public-card dt { color: var(--ink-2); }
+.rishe-public-card dd { margin: 0; font-weight: 700; }
+.rishe-public-hint { font-size: 13px; }
+.rishe-public-search { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px; }
+.rishe-public-search label { font-weight: 700; }
+.rishe-public-search input { flex: 1; min-width: 160px; height: 44px; border: 1px solid var(--line); border-radius: 10px; padding: 0 12px; font: inherit; }
+.rishe-public-search button { height: 44px; padding: 0 20px; border: 0; border-radius: 10px; background: var(--brand); color: #fff; font: inherit; font-weight: 700; cursor: pointer; }
+.rishe-public-status { padding: 12px 16px; border-radius: 10px; font-weight: 700; }
+.rishe-public-status.is-ok { background: var(--ok-soft); color: var(--ok); }
+.rishe-public-status.is-bad { background: var(--bad-soft); color: var(--bad); }
